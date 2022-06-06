@@ -123,66 +123,14 @@ contract('Mint Single and Mint Batch NFTs', async (accounts) => {
             // result = await mint.owner()
 
             result = await mint.setAddresses(beneficiary,devAddress,{from: deployer})
-            // console.log(result);
-
-            // {
-            //     tx: '0x070271242425649485e227b623a0db61130f08304bbe04e1b34097468d8c9ec5',
-            //     receipt: {
-            //       transactionHash: '0x070271242425649485e227b623a0db61130f08304bbe04e1b34097468d8c9ec5',
-            //       transactionIndex: 0,
-            //       blockHash: '0x362c6d8a86cabd8494b51f63b27a6615c20ab1e95de311cd2f14501f07a887d5',
-            //       blockNumber: 608,
-            //       from: '0x7d1b767ff5bdfb3041eed143659115476368b5f8',
-            //       to: '0x49a7f7ace8dc5f7b49f7ace42cb84b9c647fed3c',
-            //       gasUsed: 27991,
-            //       cumulativeGasUsed: 27991,
-            //       contractAddress: null,
-            //       logs: [ [Object] ],
-            //       status: true,
-            //       logsBloom: '0x00000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000044000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000',
-            //       rawLogs: [ [Object] ]
-            //     },
-            //     logs: [
-            //       {
-            //         logIndex: 0,
-            //         transactionIndex: 0,
-            //         transactionHash: '0x070271242425649485e227b623a0db61130f08304bbe04e1b34097468d8c9ec5',
-            //         blockHash: '0x362c6d8a86cabd8494b51f63b27a6615c20ab1e95de311cd2f14501f07a887d5',
-            //         blockNumber: 608,
-            //         address: '0x49A7f7acE8dC5f7b49F7Ace42Cb84b9C647Fed3c',
-            //         type: 'mined',
-            //         id: 'log_9749dede',
-            //         event: 'AddressesSet',
-            //         args: [Result]
-            //       }
-            //     ]
-            //   }
-
-        //  await expect(mint.setAddresses(beneficiary,devAddress,{from: deployer}))
-        //  .to.emit('AddressesSet')
-        //  .withArgs(beneficiary,devAddress);
-
-
-        //        await expect(token.transfer(walletTo.address, 7))
-        //  .to.emit(token, 'Transfer')
-        //  .withArgs(wallet.address, walletTo.address, 7);
-
-            // AddressesSet(beneficiary, devAddress)
             result = await mint.getAddresses({from:deployer})
             console.log("Beneficiary Addr:",result[0].toString())
             console.log("Developer Addr",result[1].toString())
             assert.equal(result[0].toString(),beneficiary.toString())
             assert.equal(result[1].toString(),devAddress.toString())
-
-
-
-         
-
-            // expect([result[0],result[1]]).to.equal([beneficiary,devAddress])
-
-
         })
 
+    
 
         it('Beneficiary not allowed to mint', async () => {
             await mint.setAddresses(beneficiary,devAddress,{from: deployer})
@@ -248,34 +196,36 @@ contract('Mint Single and Mint Batch NFTs', async (accounts) => {
         })
 
 
-        // it('Beneficiary not allowed to mint', async () => {
-        //     await mint.setAddresses(beneficiary,devAddress,{from: deployer})
-        //     await expect(mint.mintSingle("46",1,{from: beneficiary,value: "1"})).to.be.rejected;
-        // })
-
-        // it('Developer not allowed to mint', async () => {
-        //     await mint.setAddresses(beneficiary,devAddress,{from: deployer})
-        //     await expect(mint.mintSingle("46",1,{from: devAddress,value: "1"})).to.be.rejected;
-        // })
-
-
         it("Only Owner can change change the maxMintAmount", async () => {
-        await mint.SetmaxMintAmount(5,{from:deployer});
-        result = await mint.maxMintAmount()
-        assert.equal(result.toString(),'5');
+            await mint.SetmaxMintAmount(5,{from:deployer});
+            result = await mint.maxMintAmount()
+            assert.equal(result.toString(),'5');
 
         })
+
+
+
 
 
         it('Check NFT Info per tokenID', async () => {
             for(let i =0; i< ids.length; i++) {
             result = await mint.getNFTInfo(ids[i])
             // console.log(result)
-            expect(result.toString()).to.equal(nftInfo[i])
+            expect(result.toString()).to.equal(nftInfo[i]);
 
-        
-        }
+            }
+        })
 
+        it("Check the URI function return", async() => {
+            result =await  mint.uri(46,{from: deployer});
+            // console.log(result.toString())
+            expect(result.toString()).to.equal(_tokenURI.replace("{id}",'46'));
+
+            result = await mint.uri(99,{from: deployer});
+            // console.log(result.toString())
+            expect(result.toString()).to.equal(_tokenURI.replace("{id}",'99'));
+
+        })
 
 
         it('Check tokenURIs per tokenID', async () => {
@@ -298,6 +248,8 @@ contract('Mint Single and Mint Batch NFTs', async (accounts) => {
             }
         })
         
+
+
 
     })
 
@@ -379,51 +331,13 @@ contract('Mint Single and Mint Batch NFTs', async (accounts) => {
             await expect(mint.bid("46",{from: sender1,value: "1"})).to.be.rejected;
             // assert.equal(result,deployer)
 
-        })
-
-
-
-        // it('Allow sender to dutch until the end of the duration, check NFT balance and platform fees', async () => {
-        //     // result = await mint.getAuctionEndTime()
-        //     // // result.should.equal(NAME)
-        //     // console.log(result)
-
-        //     // // await time.increase(duration);
-
-        //     // assert.equal(result,deployer)
-        // })
-
-
-        // it('Dutch auction  below discounted price and fails', async () => {
-        //     // result = await mint.getAuctionEndTime()
-        //     // // result.should.equal(NAME)
-        //     // console.log(result)
-        //     // expect(await mint.bid('46',{from: sender1})
-        //     // await time.increase(duration);
-
-        //     // assert.equal(result,deployer)
-        // })
-
-
-        // it('Dutch auction above  discounted price, win an NFT, get refund on excess payment, pay dev and beneficiary', async () => {
-        //     // result = await mint.getAuctionEndTime()
-        //     // // result.should.equal(NAME)
-        //     // console.log(result)
-
-        //     // // await time.increase(duration);
-
-        //     // assert.equal(result,deployer)
-        // })
+         })
 
 
 
 
-
-
-
-})
-       
     })
+       
+})
 
     
-})

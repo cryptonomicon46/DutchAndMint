@@ -22,9 +22,11 @@ const maxMintamount = 30;
 
 const  dutchStartPrice = web3.utils.toWei("5");
 // = 5 ether;
-const dutchDiscountRate = web3.utils.toWei("0.01");
+// const dutchDiscountRate = web3.utils.toWei("0.01");
+const dutchDiscountRate = web3.utils.toWei('0.000005');
+
 // = 10000000000000000;
-const DURATION = 200;
+const DURATION = 864000; //10 days
 module.exports = async function (deployer) {
     deployer.deploy(Mint,
         ids,

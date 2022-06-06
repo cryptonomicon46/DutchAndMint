@@ -8,17 +8,24 @@ function tokens(n) {
 
 
 const ids =[46,93,99,27,5]; 
-const prices =[ web3.utils.toWei("1"),
-                web3.utils.toWei("0.5"),
-                web3.utils.toWei("0.5",),
-                web3.utils.toWei("0.5"),
-                web3.utils.toWei("0.5")
-            ];
+// const prices =[ web3.utils.toWei("1"),
+//                 web3.utils.toWei("0.5"),
+//                 web3.utils.toWei("0.5",),
+//                 web3.utils.toWei("0.5"),
+//                 web3.utils.toWei("0.5")
+//             ];
+
+    const prices =[ web3.utils.toWei("0.001"),
+        web3.utils.toWei("0.0005"),
+        web3.utils.toWei("0.0005",),
+        web3.utils.toWei("0.0005"),
+        web3.utils.toWei("0.0005")
+    ];
 
 const  maxAmounts = [50,25,25,25,0];
 
 // const royaltyFees = 5;
-const maxMintamount = 30;
+const maxMintamount = 10;
 
 const  dutchStartPrice = web3.utils.toWei("5");
 // = 5 ether;

@@ -54,14 +54,14 @@ contract('Mint Single and Mint Batch NFTs', async (accounts) => {
     const beneficiary = accounts[1]
     const devAddress = accounts[2]
     const unauthorized = accounts[3]
-    const sender1 = accounts[4]
+    const sender1 = accounts[8]
     const sender2 = accounts[5]
     const sender3 = accounts[6]
-     console.log(deployer)
-     console.log(beneficiary)
-     console.log(devAddress)
-     console.log(unauthorized)
-     console.log(sender1)
+     console.log("Deployer Addr:",deployer)
+     console.log("Beneficiary Addr:",beneficiary)
+     console.log("Developer Addr:",devAddress)
+     console.log("Unauthorized Addr:",unauthorized)
+     console.log("Sender1 Addr:",sender1)
 
     //  expect(BigNumber.from(100)).to.be.within(BigNumber.from(99), BigNumber.from(101));
     //  expect(BigNumber.from(100)).to.be.closeTo(BigNumber.from(101), 10);
@@ -248,16 +248,23 @@ contract('Mint Single and Mint Batch NFTs', async (accounts) => {
         })
 
 
-        it('Beneficiary not allowed to mint', async () => {
-            await mint.setAddresses(beneficiary,devAddress,{from: deployer})
-            await expect(mint.mintSingle("46",1,{from: beneficiary,value: "1"})).to.be.rejected;
-        })
+        // it('Beneficiary not allowed to mint', async () => {
+        //     await mint.setAddresses(beneficiary,devAddress,{from: deployer})
+        //     await expect(mint.mintSingle("46",1,{from: beneficiary,value: "1"})).to.be.rejected;
+        // })
 
-        it('Developer not allowed to mint', async () => {
-            await mint.setAddresses(beneficiary,devAddress,{from: deployer})
-            await expect(mint.mintSingle("46",1,{from: devAddress,value: "1"})).to.be.rejected;
-        })
+        // it('Developer not allowed to mint', async () => {
+        //     await mint.setAddresses(beneficiary,devAddress,{from: deployer})
+        //     await expect(mint.mintSingle("46",1,{from: devAddress,value: "1"})).to.be.rejected;
+        // })
 
+
+        it("Only Owner can change change the maxMintAmount", async () => {
+        await mint.SetmaxMintAmount(5,{from:deployer});
+        result = await mint.maxMintAmount()
+        assert.equal(result.toString(),'5');
+
+        })
 
 
         it('Check NFT Info per tokenID', async () => {
@@ -271,25 +278,25 @@ contract('Mint Single and Mint Batch NFTs', async (accounts) => {
 
 
 
-            it('Check tokenURIs per tokenID', async () => {
-                for(let i =0; i< ids.length; i++) {
-                result = await mint.uri(ids[i]);
-                tokenURI = _tokenURI.replace("{id}",ids[i].toString());
-                // console.log(`${result}, ${tokenURI}`);
-                expect(result).to.equal(tokenURI.replace("{id}",ids[i].toString()));
+        it('Check tokenURIs per tokenID', async () => {
+            for(let i =0; i< ids.length; i++) {
+            result = await mint.uri(ids[i]);
+            tokenURI = _tokenURI.replace("{id}",ids[i].toString());
+            // console.log(`${result}, ${tokenURI}`);
+            expect(result).to.equal(tokenURI.replace("{id}",ids[i].toString()));
+        }
+        })
+
+
+
+        it("Set TokenURI test", async() => {
+
+            for (let i=0;i< ids.length; i++) {
+                await mint.setTokenURI(newTokenURI.slice(0,11),ids[i].toString());
+                result = await mint.uri(ids[i].toString())
+                expect(result).to.equal(newTokenURI.slice(0,11).concat(ids[i].toString().concat(".json")))
             }
-            })
-    
-
-
-            it("Set TokenURI test", async() => {
-
-                for (let i=0;i< ids.length; i++) {
-                    await mint.setTokenURI(newTokenURI.slice(0,11),ids[i].toString());
-                    result = await mint.uri(ids[i].toString())
-                    expect(result).to.equal(newTokenURI.slice(0,11).concat(ids[i].toString().concat(".json")))
-                }
-            })
+        })
         
 
     })

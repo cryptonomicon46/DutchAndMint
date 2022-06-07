@@ -35,16 +35,20 @@ Pass - Verified: https://mumbai.polygonscan.com/address/0x128690Ccc2fC4291250cB6
 OpenSea link:
 
 
-
+DEPLOY#2: To test minting and dutch
 truffle compile -all --config truffle-config.polygon.js --network polygon_infura_testnet
 truffle migrate --config truffle-config.polygon.js --network polygon_infura_testnet --reset
 truffle run verify Mint --network polygon_infura_testnet --config truffle-config.polygon.js
 //Redeployed on the test net with smaller prices of NFTs for testing purposes
+
 Contract Address: 0x58Aa8aB78a8d527F70b58AeC3b65173b6901636a
 Verified Contract Address:
+https://mumbai.polygonscan.com/address/0x58Aa8aB78a8d527F70b58AeC3b65173b6901636a#code
 
-OpenSea link:
 
+
+
+OpenSea link of Sender:
 
 ========================
 
@@ -57,6 +61,8 @@ truffle migrate --config truffle-config.polygon.js --network polygon_infura_main
 
 Verified Contract Address:
 OpenSea link:
+
+
 
 ========================
 

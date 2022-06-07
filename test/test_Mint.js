@@ -51,10 +51,10 @@ const EVM_REVERT = 'VM Exception while processing transaction: revert'
 
 contract('Mint Single and Mint Batch NFTs', async (accounts) => {
     const deployer = accounts[0]
-    const beneficiary = accounts[1]
-    const devAddress = accounts[2]
-    const unauthorized = accounts[3]
-    const sender1 = accounts[6]
+    const beneficiary = accounts[6]
+    const devAddress = accounts[1]
+    const unauthorized = accounts[2]
+    const sender1 = accounts[3]
     // const sender2 = accounts[5]
     // const sender3 = accounts[6]
      console.log("Deployer Addr:",deployer)
@@ -197,9 +197,10 @@ contract('Mint Single and Mint Batch NFTs', async (accounts) => {
             const benWithdraw = web3.utils.BN(result)
             console.log(`benWithdraw: ${benWithdraw}`)                       
             assert.equal(result.toString(),"1900000000000000000")
+
             result = await mint.pendingWithdrawal(devAddress);
             const devWithdraw = web3.utils.BN(result)
-            console.log(`benWithdraw: ${devWithdraw}`)
+            console.log(`devWithdraw: ${devWithdraw}`)
             // console.log("DevAddress Withdraw balance:",result.toString())
             assert.equal(result.toString(),"100000000000000000");
 
@@ -209,25 +210,11 @@ contract('Mint Single and Mint Batch NFTs', async (accounts) => {
             result = await mint.pendingWithdrawal(beneficiary)
             assert.equal(result.toString(),'0')
 
-            const benBal_t1 = await web3.eth.getBalance(beneficiary)
-            const devBal_t1 = await web3.eth.getBalance(devAddress)
-            // console.log(`ben t1 balance ${benBal_t1}`)
-            // console.log(`dev t1 balance ${devBal_t1}`)
-            // assert.equal(benBal_t0.add(benWithdraw).toString(),benBal_t1.toString())
-            // assert.equal(devBal_t0.add(devWithdraw),devBal_t1)
-
-
-
-            // assert.equal(benBal_t1.toString(),benBal_t0.add("1900000000000000000").toString())
-            
-            // assert.equal(result.toString(),"1900000000000000000")
-   
-
             //Withdraw the amount for developer and check if pending balance is zero
             await mint.withdraw({from: devAddress, value: "100000000000000000"})
             result = await mint.pendingWithdrawal(devAddress)
             assert.equal(result.toString(),'0')
-            // assert.equal(result.toString(),"100000000000000000")
+
 
 
         })

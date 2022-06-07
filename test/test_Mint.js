@@ -100,7 +100,7 @@ contract('Mint Single and Mint Batch NFTs', async (accounts) => {
             assert.equal(result,deployer)
         })
 
-        it('Only owner can set beneficiary and developer addresses', async () => {
+        it('Unauthorized account cannot set beneficiary and developer addresses', async () => {
 
         //  await expect(token.transfer(walletTo.address, 7))
         //  .to.emit(token, 'Transfer')
@@ -240,19 +240,9 @@ contract('Mint Single and Mint Batch NFTs', async (accounts) => {
             }
         })
 
-        it("Check the URI function return", async() => {
-            result =await  mint.uri(46,{from: deployer});
-            // console.log(result.toString())
-            expect(result.toString()).to.equal(_tokenURI.replace("{id}",'46'));
-
-            result = await mint.uri(99,{from: deployer});
-            // console.log(result.toString())
-            expect(result.toString()).to.equal(_tokenURI.replace("{id}",'99'));
-
-        })
 
 
-        it('Check tokenURIs per tokenID', async () => {
+        it('Test if the URI function returns the correct per token URI', async () => {
             for(let i =0; i< ids.length; i++) {
             result = await mint.uri(ids[i]);
             tokenURI = _tokenURI.replace("{id}",ids[i].toString());

@@ -54,9 +54,9 @@ contract('Mint Single and Mint Batch NFTs', async (accounts) => {
     const beneficiary = accounts[1]
     const devAddress = accounts[2]
     const unauthorized = accounts[3]
-    const sender1 = accounts[8]
-    const sender2 = accounts[5]
-    const sender3 = accounts[6]
+    const sender1 = accounts[6]
+    // const sender2 = accounts[5]
+    // const sender3 = accounts[6]
      console.log("Deployer Addr:",deployer)
      console.log("Beneficiary Addr:",beneficiary)
      console.log("Developer Addr:",devAddress)
@@ -144,7 +144,7 @@ contract('Mint Single and Mint Batch NFTs', async (accounts) => {
 
 
 
-        it("Mint single, pay beneficiary and developer", async () => {
+        it("Mint single, confirm that beneficiary and developer can withdraw their payouts", async () => {
             // await mint.setAddresses(beneficiary,devAddress,{from: deployer})
             // result = (await web3.eth.getBalance(sender1));
             // console.log("Sender Account Balance:",web3.utils.fromWei(result)," ETH");
@@ -170,8 +170,16 @@ contract('Mint Single and Mint Batch NFTs', async (accounts) => {
 
 
 
-        it("Mint batch must fail, pay beneficiary and developer", async () => {
+        it("Mint batch must fail, confirm that beneficiary and developer can withdraw their payouts.", async () => {
             await mint.setAddresses(beneficiary,devAddress,{from: deployer})
+            result = await web3.eth.getBalance(beneficiary)
+            const benBal_t0 = web3.utils.toBN(result);
+            console.log("Bent0 balance:",benBal_t0.toString())
+
+            result = await web3.eth.getBalance(devAddress)
+            const devBal_t0 = web3.utils.toBN(result);
+            console.log("Dev T0 balance:",devBal_t0.toString())
+
             result = (await web3.eth.getBalance(sender1));
             // console.log("Sender Account Balance:",web3.utils.fromWei(result));
              result = await mint.getNFTInfo(46)
@@ -186,11 +194,40 @@ contract('Mint Single and Mint Batch NFTs', async (accounts) => {
 
             result = await mint.pendingWithdrawal(beneficiary);
             // console.log("Beneficiary Withdraw balance:",result.toString())
-                                            
+            const benWithdraw = web3.utils.BN(result)
+            console.log(`benWithdraw: ${benWithdraw}`)                       
             assert.equal(result.toString(),"1900000000000000000")
             result = await mint.pendingWithdrawal(devAddress);
+            const devWithdraw = web3.utils.BN(result)
+            console.log(`benWithdraw: ${devWithdraw}`)
             // console.log("DevAddress Withdraw balance:",result.toString())
             assert.equal(result.toString(),"100000000000000000");
+
+
+            //Withdraw the amount for beneficiary and check if pending balance is zero
+            await mint.withdraw({from: beneficiary, value: "1900000000000000000"})
+            result = await mint.pendingWithdrawal(beneficiary)
+            assert.equal(result.toString(),'0')
+
+            const benBal_t1 = await web3.eth.getBalance(beneficiary)
+            const devBal_t1 = await web3.eth.getBalance(devAddress)
+            // console.log(`ben t1 balance ${benBal_t1}`)
+            // console.log(`dev t1 balance ${devBal_t1}`)
+            // assert.equal(benBal_t0.add(benWithdraw).toString(),benBal_t1.toString())
+            // assert.equal(devBal_t0.add(devWithdraw),devBal_t1)
+
+
+
+            // assert.equal(benBal_t1.toString(),benBal_t0.add("1900000000000000000").toString())
+            
+            // assert.equal(result.toString(),"1900000000000000000")
+   
+
+            //Withdraw the amount for developer and check if pending balance is zero
+            await mint.withdraw({from: devAddress, value: "100000000000000000"})
+            result = await mint.pendingWithdrawal(devAddress)
+            assert.equal(result.toString(),'0')
+            // assert.equal(result.toString(),"100000000000000000")
 
 
         })

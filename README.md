@@ -106,7 +106,9 @@ Adding Polygon Mainnet and test net to Metamask
 https://docs.polygon.technology/docs/develop/network-details/network/
 
 
-
+If the above doesn't work, then find your network in the following link:
+https://chainlist.org/
+Search for your network and add it
 
 
 

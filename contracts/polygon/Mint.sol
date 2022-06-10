@@ -106,7 +106,7 @@ constructor  (
         prices = prices_;
         maxAmounts = maxAmounts_;
 
-               for(uint i =0; i< ids.length; i++) {
+            for(uint i =0; i< ids.length; i++) {
             _idToidx[ids[i]] = i;
             nftInfo.push(NFTInfo({
             id: ids[i],

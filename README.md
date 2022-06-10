@@ -101,6 +101,10 @@ https://mumbai.polygonscan.com/
 
 
 
+//===========================
+Adding Polygon Mainnet and test net to Metamask
+https://docs.polygon.technology/docs/develop/network-details/network/
+
 
 
 

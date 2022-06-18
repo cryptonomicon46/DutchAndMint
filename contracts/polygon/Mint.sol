@@ -3,8 +3,9 @@ pragma solidity ^0.8.13;
 import "@openzeppelin/contracts/utils/math/SafeMath.sol"; //Safemath no longer needed Sol v0.8.0 onwards
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
+import "./Interfaces.sol";
 
-contract Mint is ERC1155{
+contract Mint is IMint, ERC1155{
 
     using SafeMath for uint256;
     using Strings for string;
@@ -17,7 +18,6 @@ contract Mint is ERC1155{
     uint EXPIRY= 365 days;
     uint public immutable startedAt;
     uint internal timeElapsed;
-    // uint DURATION = 10 days;
     address payable public owner;
 
     event NFTReservesUpdated(uint256 idx, uint256 amount);
@@ -33,9 +33,7 @@ contract Mint is ERC1155{
     error InvalidAddress();
     error InvalidExpiryDate();
     error NothingToWithdraw();
-    error OwnerCannotParticipate();
-    error BeneficiaryCannotParticipate();
-    error DevCannotParticipate();
+
     error InvalidTransaction();
 
     string public baseExtension = ".json";
@@ -58,33 +56,40 @@ contract Mint is ERC1155{
     uint dutchDiscountRate;// = 10000000000000000;
     uint auctionEndTime;
 
-// for 10 days 5000000000000 * 864000 = 3.45e18
-//for 200 secs 10000000000000000 * 200 = 4e18
-
-    struct NFTInfo {
-        uint256 id;
-        uint256 price;
-        uint256 reserves;
-        }
 
     NFTInfo[] internal nftInfo;
-
-    struct MintVariables {
-        uint idx;
-        uint id;
-        uint price;
-        uint reserves;
-        uint amount;
-        uint totalPrice;
-        uint beneficiaryAmount;
-        uint devAmount;
-    }
 
     MintVariables  m_vars;
     mapping (uint256 => uint256) internal _idToidx; //TokenId to Index position mapping
     mapping (uint256=>  string) _tokenURI; //TokenId to tokenURI mapping
     mapping (address => uint256) public pendingWithdrawal;// withdraw later
 
+
+
+    DutchStage dutchStage;
+
+    mapping (uint => Payments) dutchAuctionInfo;
+
+ Payments payment;
+    modifier dutchTimedTransitions() {
+        if (block.timestamp > auctionEndTime)
+            nextDutchStage();
+            _;
+    }
+
+
+    modifier atDutchStage(DutchStage dutchStage_) {
+        if (dutchStage != dutchStage_) revert FunctionInvalidAtThisStage();
+        _;
+
+    }
+
+    function nextDutchStage() internal {
+        dutchStage = DutchStage(uint(dutchStage)+1);
+    }
+
+ //-------------------------
+//DUTCH AUCTION: START 
 constructor  (
             uint256[] memory ids_,
             uint256[] memory prices_, 
@@ -167,8 +172,6 @@ constructor  (
         mintStage = MintStage(uint(mintStage)+1);
     }
 
- //-------------------------
-//MINT SINGLE : START 
 
        function mintSingle(uint256 _id, uint256 _amount)  
          public   
@@ -177,10 +180,6 @@ constructor  (
          atMintStage(MintStage.MintLive){
        if (msg.sender == address(0)) revert InvalidAddress();
         require(_amount<= maxMintAmount && balanceOf(msg.sender,_id) <= maxMintAmount,"There's a limit to minting per address");
-        // require(msg.sender != owner || msg.sender != beneficiary || msg.sender != devAddress,"Owner, beneficiary and devs cannot bid on this auction");
-         if (msg.sender == owner) revert OwnerCannotParticipate();
-         if (msg.sender == beneficiary) revert BeneficiaryCannotParticipate();
-         if (msg.sender == devAddress) revert DevCannotParticipate();
 
         uint256 _idx;
         _idx =  _idToidx[_id];
@@ -195,7 +194,6 @@ constructor  (
         require( nftReserves >= _amount,"ERC1155: Sorry, this NFT's sold out!");
         // require(  price*_amount<= msg.value,"ERC1155: You don't have enough funds for this single mint");
         if( msg.value< price*_amount) revert InvalidTransaction();
-        // "ERC1155: You don't have enough funds for this batch mint");
 
 
         //Update NFT Reserves
@@ -211,12 +209,61 @@ constructor  (
         beneficiaryAmount = msg.value-royaltyFees;
 
         //Using the pendingWithdrawal method
-        pendingWithdrawal[devAddress] = royaltyFees;
-        pendingWithdrawal[beneficiary] = beneficiaryAmount;
+        pendingWithdrawal[devAddress] =  pendingWithdrawal[devAddress]+ royaltyFees;
+        pendingWithdrawal[beneficiary] = pendingWithdrawal[beneficiary] + beneficiaryAmount;
 
     }
-//***/
-//----------------
+
+
+
+    // function mintBatch(uint256[] memory _ids, uint256[] memory _amounts) 
+    // public    
+    // payable 
+    // mintTimedTransitions() 
+    // atMintStage(MintStage.MintLive)
+    // returns (uint,uint){
+
+    //     if (msg.sender == address(0)) revert InvalidAddress();
+    //     //  if (msg.sender == owner) revert OwnerCannotParticipate();
+    //     //  if (msg.sender == beneficiary) revert BeneficiaryCannotParticipate();
+    //     //  if (msg.sender == devAddress) revert DevCannotParticipate();       
+    //       require(_ids.length == _amounts.length,"ERC1155: Invalid array lengths");
+        
+    //    m_vars.totalPrice = 0;
+       
+    //     // NFTInfo memory nftInfo_;
+    //     m_vars.totalPrice = 0;//Initialization
+
+    //     for(uint i =0; i< _ids.length; i++) {
+    //     m_vars.idx =  _idToidx[_ids[i]];
+    //     m_vars.id = _ids[i];
+    //     m_vars.price = nftInfo[m_vars.idx].price;
+    //     m_vars.reserves = nftInfo[m_vars.idx].reserves;
+    //     m_vars.amount = _amounts[i];
+    //     require(m_vars.reserves >= m_vars.amount,
+    //     "ERC1155: Not enough NFTs of this tokenId in stock!");
+    //     require(m_vars.amount<= maxMintAmount,
+    //      "There's a limit to minting per address");
+       
+    //     _updateReserves(m_vars.idx,m_vars.amount);
+    //     mintSingle(m_vars.id,m_vars.amount);
+    //     m_vars.totalPrice += (m_vars.price*m_vars.amount);
+
+    //     }
+
+    //      if( msg.value < m_vars.totalPrice) revert InvalidTransaction();
+
+     
+    //     //Using the pendingWithdrawal method
+    //     m_vars.devAmount = (m_vars.totalPrice*royaltyFee)/100;
+    //     m_vars.beneficiaryAmount = m_vars.totalPrice - m_vars.devAmount;
+
+    //     pendingWithdrawal[devAddress] +=  m_vars.devAmount;
+    //     pendingWithdrawal[beneficiary] +=  m_vars.beneficiaryAmount;  
+    //     return ( msg.value, m_vars.totalPrice);
+    // }
+
+
 
 // /MINT BATCH : START 
     function mintBatch(uint256[] memory _ids, uint256[] memory _amounts) 
@@ -227,9 +274,9 @@ constructor  (
     returns (uint,uint){
 
         if (msg.sender == address(0)) revert InvalidAddress();
-         if (msg.sender == owner) revert OwnerCannotParticipate();
-         if (msg.sender == beneficiary) revert BeneficiaryCannotParticipate();
-         if (msg.sender == devAddress) revert DevCannotParticipate();       
+        //  if (msg.sender == owner) revert OwnerCannotParticipate();
+        //  if (msg.sender == beneficiary) revert BeneficiaryCannotParticipate();
+        //  if (msg.sender == devAddress) revert DevCannotParticipate();       
         //   require(_ids.length == _amounts.length,"ERC1155: Invalid array lengths");
         
        m_vars.totalPrice = 0;
@@ -256,24 +303,26 @@ constructor  (
         //   //Calculate the cumulative platform fees per token/amount
         // //Calculate total owner payments for the batch mint
 
-            mintSingle(m_vars.id,m_vars.amount);
+        // _mint(m_vars.id,m_vars.amount);
         m_vars.totalPrice= m_vars.totalPrice+ (m_vars.price*m_vars.amount);
 
         }
 
          if( msg.value < m_vars.totalPrice) revert InvalidTransaction();
+         _mintBatch(msg.sender,_ids,_amounts,"");//Mint the NFTs
 
-     
-        //Using the pendingWithdrawal method
+     //For loop to mint the NFTs
+
+
+        // //Using the pendingWithdrawal method
         m_vars.devAmount = (m_vars.totalPrice*royaltyFee)/100;
         m_vars.beneficiaryAmount = m_vars.totalPrice - m_vars.devAmount;
 
-        pendingWithdrawal[devAddress] = m_vars.devAmount;
-        pendingWithdrawal[beneficiary] =  m_vars.beneficiaryAmount;  
-        return ( msg.value, m_vars.totalPrice);
+        pendingWithdrawal[devAddress] += m_vars.devAmount;
+        pendingWithdrawal[beneficiary] +=  m_vars.beneficiaryAmount;  
+        // return ( msg.value, m_vars.totalPrice);
+        return (m_vars.beneficiaryAmount, m_vars.devAmount);
     }
-
-
 
 
     function getElapsedTime() public 
@@ -289,10 +338,7 @@ constructor  (
         return block.timestamp;
     }
 
-   
-
-    //ERC1155: Returns the tokenURI of TokenId
-    function uri(uint256 id) override public view returns (string memory) {
+       function uri(uint256 id) override public view returns (string memory) {
         require (bytes(_tokenURI[id]).length !=0, "This token doesn't exist!");
         return _tokenURI[id];
     }
@@ -352,48 +398,6 @@ function getAddresses() public view onlyBy(owner) returns (address,address){
 }
 
 
-//----
-//DUTCH auction start
-
-//ERC1155 Mint variables 
-    enum DutchStage {
-        DutchAuctionLive,
-        DutchAuctionEnded
-    }
-
-    DutchStage dutchStage;
-
-    struct Payments {
-        uint price;
-        uint balance;
-        uint refund;
-        uint devPayment;
-        uint ownerPayment;}
-
-    mapping (uint => Payments) dutchAuctionInfo;
-
- Payments payment;
-
-
-    modifier dutchTimedTransitions() {
-        if (block.timestamp > auctionEndTime)
-            nextDutchStage();
-            _;
-    }
-
-
-    modifier atDutchStage(DutchStage dutchStage_) {
-        if (dutchStage != dutchStage_) revert FunctionInvalidAtThisStage();
-        _;
-
-    }
-
-    function nextDutchStage() internal {
-        dutchStage = DutchStage(uint(dutchStage)+1);
-    }
-
- //-------------------------
-//DUTCH AUCTION: START 
 
  function bid(uint256 tokenId) 
         external 
@@ -402,7 +406,6 @@ function getAddresses() public view onlyBy(owner) returns (address,address){
         atDutchStage(DutchStage.DutchAuctionLive) 
            returns (uint, uint,uint,uint,uint)
         {
-    //    if (msg.sender == address(0)) revert InvalidAddress();
        if (block.timestamp > auctionEndTime) revert AuctionAlreadyEnded();
         require(msg.sender != owner && msg.sender != beneficiary && msg.sender != devAddress,"Owner, beneficiary and devs cannot bid on this auction");
         uint256 _idx;
@@ -412,9 +415,7 @@ function getAddresses() public view onlyBy(owner) returns (address,address){
        require  (msg.value >=  dutchAuctionInfo[tokenId].price,"Bid not high enough!");
         _updateReserves(_idx,1); //Subtract 1, as we only have 1 of this NFT
       _mint(msg.sender,tokenId,1,""); // //1:1 NFT minted
-    // emit Sold(tokenId, msg.sender);
 
-    // //Refund the balance and emit an event
      if (msg.value> dutchAuctionInfo[tokenId].price) 
         {dutchAuctionInfo[tokenId].refund = msg.value - dutchAuctionInfo[tokenId].price;
         pendingWithdrawal[msg.sender] +=dutchAuctionInfo[tokenId].refund;}
@@ -425,7 +426,6 @@ function getAddresses() public view onlyBy(owner) returns (address,address){
                                                 *(royaltyFee)/100);
         dutchAuctionInfo[tokenId].ownerPayment = dutchAuctionInfo[tokenId].balance
                                                     - dutchAuctionInfo[tokenId].devPayment;
-    //    //Using the pendingWithdrawal method
 
         pendingWithdrawal[devAddress] = dutchAuctionInfo[tokenId].devPayment;
         pendingWithdrawal[beneficiary] = dutchAuctionInfo[tokenId].ownerPayment;
@@ -439,9 +439,6 @@ function getAddresses() public view onlyBy(owner) returns (address,address){
  }
 
 
-    // function getDiscount() internal view returns (uint) {
-    //     return dutchDiscountRate * DURATION_;
-    // }
 
     function getDiscount(uint dutchDiscountRate_,uint DURATION_) 
         internal 
@@ -478,13 +475,7 @@ function getAuctionEndTime()
             emit MaxMintAmountChanged(maxMintAmount);
         }
 
-    //----
-
-
 }
 
 
-
-
-//Compiled byte code
 

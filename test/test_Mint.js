@@ -1,7 +1,8 @@
-
 const Mint = artifacts.require("./Mint")
 const { assert, expect, should, Assertion } = require('chai')
 const { BN, expectRevert, time } = require('@openzeppelin/test-helpers');
+
+
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
@@ -40,36 +41,15 @@ const EVM_REVERT = 'VM Exception while processing transaction: revert'
     const royaltyFees =5;
     const maxMintAmount = 20;
     let duration = time.duration.seconds(300); //300 seconds
+
+    // let duration = time.duration
     const d = new Date();
 
 
-    // uint dutchStartPrice_,
-    //             uint dutchDiscountRate_,
-    //             uint DURATION_
-
- 
 
 contract('Mint Single and Mint Batch NFTs', async (accounts) => {
-    const deployer = accounts[0]
-    const beneficiary = accounts[6]
-    const devAddress = accounts[1]
-    const unauthorized = accounts[2]
-    const sender1 = accounts[3]
-    // const sender2 = accounts[5]
-    // const sender3 = accounts[6]
-     console.log("Deployer Addr:",deployer)
-     console.log("Beneficiary Addr:",beneficiary)
-     console.log("Developer Addr:",devAddress)
-     console.log("Unauthorized Addr:",unauthorized)
-     console.log("Sender1 Addr:",sender1)
+    [deployer,beneficiary,devAddress,unauthorized,sender1] = accounts;
 
-    //  expect(BigNumber.from(100)).to.be.within(BigNumber.from(99), BigNumber.from(101));
-    //  expect(BigNumber.from(100)).to.be.closeTo(BigNumber.from(101), 10);
-         // expect(await token.balanceOf(wallet.address)).to.equal(993);
-
-        //  await expect(token.transfer(walletTo.address, 7))
-        //  .to.emit(token, 'Transfer')
-        //  .withArgs(wallet.address, walletTo.address, 7);
 
     describe('Deployment', () => {
 
@@ -102,18 +82,7 @@ contract('Mint Single and Mint Batch NFTs', async (accounts) => {
 
         it('Unauthorized account cannot set beneficiary and developer addresses', async () => {
 
-        //  await expect(token.transfer(walletTo.address, 7))
-        //  .to.emit(token, 'Transfer')
-        //  .withArgs(wallet.address, walletTo.address, 7);
-
             await expect(mint.setAddresses(beneficiary,devAddress,{from: unauthorized})).to.be.rejected;
-
-            // await mint.setAddresses(beneficiary,devAddress,{from: deployer})
-
-            // result = await mint.getAddresses()
-            // console.log(result.toString())
-            // expect(result).to.equal({beneficiary,devAddress})
-
 
         })
 
@@ -124,100 +93,14 @@ contract('Mint Single and Mint Batch NFTs', async (accounts) => {
 
             result = await mint.setAddresses(beneficiary,devAddress,{from: deployer})
             result = await mint.getAddresses({from:deployer})
-            console.log("Beneficiary Addr:",result[0].toString())
-            console.log("Developer Addr",result[1].toString())
+            // console.log("Beneficiary Addr:",result[0].toString())
+            // console.log("Developer Addr",result[1].toString())
             assert.equal(result[0].toString(),beneficiary.toString())
             assert.equal(result[1].toString(),devAddress.toString())
         })
 
     
-
-        it('Beneficiary not allowed to mint', async () => {
-            await mint.setAddresses(beneficiary,devAddress,{from: deployer})
-            await expect(mint.mintSingle("46",1,{from: beneficiary,value: "1"})).to.be.rejected;
-        })
-
-        it('Developer not allowed to mint', async () => {
-            await mint.setAddresses(beneficiary,devAddress,{from: deployer})
-            await expect(mint.mintSingle("46",1,{from: devAddress,value: "1"})).to.be.rejected;
-        })
-
-
-
-        it("Mint single, confirm that beneficiary and developer can withdraw their payouts", async () => {
-            // await mint.setAddresses(beneficiary,devAddress,{from: deployer})
-            // result = (await web3.eth.getBalance(sender1));
-            // console.log("Sender Account Balance:",web3.utils.fromWei(result)," ETH");
-            //  result = await mint.getNFTInfo(46)
-            //  console.log("Price of one NFT:",web3.utils.fromWei(result.price))
-            //  console.log(web3.utils.fromWei(result.price))
-            await (mint.mintSingle("46",1,{from: sender1,value:  web3.utils.toWei("1")}));
-            result = await mint.balanceOf(sender1,"46");
-            // console.log(result.toString());
-            assert.equal(result,"1")
-            result = await mint.pendingWithdrawal(beneficiary);
-            assert.equal(result,"950000000000000000")
-            result = await mint.pendingWithdrawal(devAddress);
-            assert.equal(result,"50000000000000000");
-            // result = await mint.pendingWithdrawal(beneficiary);
-            // console.log("Beneficiary Withdraw balance:",result.toString())
-            // result = await mint.pendingWithdrawal(devAddress);
-            // console.log("DevAddress Withdraw balance:",result.toString())
-
-
-        })
-
-
-
-
-        it("Mint batch must fail, confirm that beneficiary and developer can withdraw their payouts.", async () => {
-            await mint.setAddresses(beneficiary,devAddress,{from: deployer})
-            result = await web3.eth.getBalance(beneficiary)
-            const benBal_t0 = web3.utils.toBN(result);
-            console.log("Bent0 balance:",benBal_t0.toString())
-
-            result = await web3.eth.getBalance(devAddress)
-            const devBal_t0 = web3.utils.toBN(result);
-            console.log("Dev T0 balance:",devBal_t0.toString())
-
-            result = (await web3.eth.getBalance(sender1));
-            // console.log("Sender Account Balance:",web3.utils.fromWei(result));
-             result = await mint.getNFTInfo(46)
-            //  console.log("Price of one NFT:",web3.utils.fromWei(result.price))
-            //  console.log(web3.utils.fromWei(result.price))
-            result = await mint.mintBatch(["46","99"],["1","2"],{from: sender1,value: web3.utils.toWei("2")});
-            // execution cost	111496 gas 
-            // console.log("The total proceeds = ",result)
-            result = await mint.balanceOfBatch([sender1,sender1],[46,99]);
-            // console.log(result.toString())
-            expect(result.toString()).to.equal("1,2")
-
-            result = await mint.pendingWithdrawal(beneficiary);
-            // console.log("Beneficiary Withdraw balance:",result.toString())
-            const benWithdraw = web3.utils.BN(result)
-            console.log(`benWithdraw: ${benWithdraw}`)                       
-            assert.equal(result.toString(),"1900000000000000000")
-
-            result = await mint.pendingWithdrawal(devAddress);
-            const devWithdraw = web3.utils.BN(result)
-            console.log(`devWithdraw: ${devWithdraw}`)
-            // console.log("DevAddress Withdraw balance:",result.toString())
-            assert.equal(result.toString(),"100000000000000000");
-
-
-            //Withdraw the amount for beneficiary and check if pending balance is zero
-            await mint.withdraw({from: beneficiary, value: "1900000000000000000"})
-            result = await mint.pendingWithdrawal(beneficiary)
-            assert.equal(result.toString(),'0')
-
-            //Withdraw the amount for developer and check if pending balance is zero
-            await mint.withdraw({from: devAddress, value: "100000000000000000"})
-            result = await mint.pendingWithdrawal(devAddress)
-            assert.equal(result.toString(),'0')
-
-
-
-        })
+        
 
 
         it("Only Owner can change change the maxMintAmount", async () => {
@@ -267,6 +150,121 @@ contract('Mint Single and Mint Batch NFTs', async (accounts) => {
 
     })
 
+
+    describe('Mint Single Test ', () => {
+
+        let result, timeDeployed
+
+        beforeEach(async () => {
+
+            mint = await Mint.new(
+                ids,
+                prices,
+                maxAmounts,
+                // royaltyFees,
+                maxMintAmount,
+                dutchStartPrice,
+                dutchDiscountRate,
+                DURATION
+            )
+            await mint.setAddresses(beneficiary,devAddress,{from: deployer});
+            // auctionEndTime = Math.round(d.getTime()/1000) + DURATION ;//time in seconds
+
+
+        })
+
+        it("Mint single, confirm that beneficiary and developer can withdraw their payouts", async () => {
+
+            await (mint.mintSingle("46",1,{from: sender1,value:  web3.utils.toWei("1")}));
+            result = await mint.balanceOf(sender1,"46");
+
+            assert.equal(result,"1")
+            result = await mint.pendingWithdrawal(beneficiary);
+            assert.equal(result,"950000000000000000")
+            result = await mint.pendingWithdrawal(devAddress);
+            assert.equal(result,"50000000000000000");
+       
+            await (mint.mintSingle("46",1,{from: sender1,value:  web3.utils.toWei("1")}));
+            result = await mint.balanceOf(sender1,"46");
+            // console.log(result.toString());
+            assert.equal(result,"2")
+            result = await mint.pendingWithdrawal(beneficiary);
+            assert.equal(result.toString(),"1900000000000000000")
+            result = await mint.pendingWithdrawal(devAddress);
+            assert.equal(result.toString(),"100000000000000000");
+
+            await (mint.mintSingle("93",4,{from: sender1,value:  web3.utils.toWei("2")}));
+            result = await mint.balanceOf(sender1,"93");
+            assert.equal(result,"4")
+            result = await mint.pendingWithdrawal(beneficiary);
+            assert.equal(result.toString(),"3800000000000000000")
+            result = await mint.pendingWithdrawal(devAddress);
+            assert.equal(result.toString(),"200000000000000000");
+
+            await mint.withdraw({from:beneficiary});
+            result = await mint.pendingWithdrawal(beneficiary);
+            assert.equal(result.toString(),'0')
+
+            await mint.withdraw({from:devAddress});
+            result = await mint.pendingWithdrawal(devAddress);
+            assert.equal(result.toString(),'0')
+
+        })
+    })
+
+
+    describe('Mint Batch Test ', () => {
+
+        let result, timeDeployed
+
+        beforeEach(async () => {
+
+            mint = await Mint.new(
+                ids,
+                prices,
+                maxAmounts,
+                // royaltyFees,
+                maxMintAmount,
+                dutchStartPrice,
+                dutchDiscountRate,
+                DURATION
+            )
+            await mint.setAddresses(beneficiary,devAddress,{from: deployer});
+            // auctionEndTime = Math.round(d.getTime()/1000) + DURATION ;//time in seconds
+
+
+        })
+        it("Mint batch must fail, confirm that beneficiary and developer can withdraw their payouts.", async () => {
+
+            result = await mint.mintBatch([46,99],[1,2],{from: sender1,value: web3.utils.toWei("2")});
+            result = await mint.balanceOfBatch([sender1,sender1],[46,99]);
+            expect(result.toString()).to.equal("1,2")
+
+            result = await mint.pendingWithdrawal(beneficiary);
+            console.log("Beneficiary Withdraw balance:",result.toString())               
+            assert.equal(result.toString(),"1900000000000000000")
+
+            result = await mint.pendingWithdrawal(devAddress);
+            console.log("DevAddress Withdraw balance:",result.toString())
+            assert.equal(result.toString(),"100000000000000000");
+
+            result = await mint.mintBatch(["46","99"],["1","2"],{from: sender1,value: web3.utils.toWei("2")});
+            result = await mint.balanceOfBatch([sender1,sender1],[46,99]);
+            expect(result.toString()).to.equal("2,4")
+
+     
+            result = await mint.pendingWithdrawal(beneficiary);
+            console.log("Beneficiary Withdraw balance:",result.toString())                 
+            assert.equal(result.toString(),"3800000000000000000")
+
+            result = await mint.pendingWithdrawal(devAddress);
+            console.log("DevAddress Withdraw balance:",result.toString())
+            assert.equal(result.toString(),"200000000000000000");
+
+        })
+    })
+
+
     describe('Dutch Auction Tests', () => {
 
         let result, timeDeployed
@@ -286,7 +284,7 @@ contract('Mint Single and Mint Batch NFTs', async (accounts) => {
             await mint.setAddresses(beneficiary,devAddress,{from: deployer});
             timeDeployed = Math.round(d.getTime()/1000);//time in seconds
             auctionEndTime = Math.round(d.getTime()/1000) + DURATION ;//time in seconds
-            console.log('StartTime:',timeDeployed,' EndTime:', auctionEndTime);
+            // console.log('StartTime:',timeDeployed,' EndTime:', auctionEndTime);
 
         })
 
@@ -305,8 +303,10 @@ contract('Mint Single and Mint Batch NFTs', async (accounts) => {
             //Wait a bit for price to reduce, get current price and then bid for the NFT to win it
             await time.increase(duration/2);
             result = await  mint.getDutchPrice({from: deployer})
+
+            dutchStartPrice - (dutchDiscountRate*getElapsedTime());
             dutchPriceVal = web3.utils.toBN(result);
-            console.log("Sender Paid ",dutchPriceVal.toString())
+            // console.log("Sender Paid ",dutchPriceVal.toString())
             await time.increase(86400);//Advance 1 day 
             
             //Sender1 bids for an NFT
@@ -318,18 +318,18 @@ contract('Mint Single and Mint Batch NFTs', async (accounts) => {
 
             result = await mint.pendingWithdrawal(sender1);
             const senderVal = web3.utils.toBN(result);
-            console.log("Sender1 refund amount:",senderVal.toString())                               
+            // console.log("Sender1 refund amount:",senderVal.toString())                               
             // console.log(typeOf(senderVal))
             // assert.equal(result.toString(),"9347050000000000000")
 
             result = await mint.pendingWithdrawal(beneficiary);
             const beneficiaryVal = web3.utils.toBN(result);
-            console.log("Beneficiary withdraw balance:",beneficiaryVal.toString())    
+            // console.log("Beneficiary withdraw balance:",beneficiaryVal.toString())    
             // assert.equal(result.toString(),"9347050000000000000")       
            
             result = await mint.pendingWithdrawal(devAddress);
             const devVal = web3.utils.toBN(result);
-            console.log("Developer withdraw balance:",devVal.toString())    
+            // console.log("Developer withdraw balance:",devVal.toString())    
 
             //The sum of seller refund, the beneficiary pay and developer pay should equal the sent value
             // assert.equal(result.toString(),"491950000000000000");

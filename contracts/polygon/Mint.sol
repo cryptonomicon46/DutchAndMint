@@ -216,54 +216,6 @@ constructor  (
 
 
 
-    // function mintBatch(uint256[] memory _ids, uint256[] memory _amounts) 
-    // public    
-    // payable 
-    // mintTimedTransitions() 
-    // atMintStage(MintStage.MintLive)
-    // returns (uint,uint){
-
-    //     if (msg.sender == address(0)) revert InvalidAddress();
-    //     //  if (msg.sender == owner) revert OwnerCannotParticipate();
-    //     //  if (msg.sender == beneficiary) revert BeneficiaryCannotParticipate();
-    //     //  if (msg.sender == devAddress) revert DevCannotParticipate();       
-    //       require(_ids.length == _amounts.length,"ERC1155: Invalid array lengths");
-        
-    //    m_vars.totalPrice = 0;
-       
-    //     // NFTInfo memory nftInfo_;
-    //     m_vars.totalPrice = 0;//Initialization
-
-    //     for(uint i =0; i< _ids.length; i++) {
-    //     m_vars.idx =  _idToidx[_ids[i]];
-    //     m_vars.id = _ids[i];
-    //     m_vars.price = nftInfo[m_vars.idx].price;
-    //     m_vars.reserves = nftInfo[m_vars.idx].reserves;
-    //     m_vars.amount = _amounts[i];
-    //     require(m_vars.reserves >= m_vars.amount,
-    //     "ERC1155: Not enough NFTs of this tokenId in stock!");
-    //     require(m_vars.amount<= maxMintAmount,
-    //      "There's a limit to minting per address");
-       
-    //     _updateReserves(m_vars.idx,m_vars.amount);
-    //     mintSingle(m_vars.id,m_vars.amount);
-    //     m_vars.totalPrice += (m_vars.price*m_vars.amount);
-
-    //     }
-
-    //      if( msg.value < m_vars.totalPrice) revert InvalidTransaction();
-
-     
-    //     //Using the pendingWithdrawal method
-    //     m_vars.devAmount = (m_vars.totalPrice*royaltyFee)/100;
-    //     m_vars.beneficiaryAmount = m_vars.totalPrice - m_vars.devAmount;
-
-    //     pendingWithdrawal[devAddress] +=  m_vars.devAmount;
-    //     pendingWithdrawal[beneficiary] +=  m_vars.beneficiaryAmount;  
-    //     return ( msg.value, m_vars.totalPrice);
-    // }
-
-
 
 // /MINT BATCH : START 
     function mintBatch(uint256[] memory _ids, uint256[] memory _amounts) 

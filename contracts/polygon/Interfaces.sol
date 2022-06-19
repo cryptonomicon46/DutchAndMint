@@ -52,7 +52,7 @@ interface IMint {
     function getAddresses() external returns (address,address);
     function getPendingBalance(address) external returns (uint);
     // function getDiscount(uint,uint) external returns (uint);
-    function getDutchPrice() external returns(uint);
+    // function getDutchPrice() external returns(uint);
     function getAuctionEndTime() external returns (uint);
     function SetmaxMintAmount(uint) external;
 

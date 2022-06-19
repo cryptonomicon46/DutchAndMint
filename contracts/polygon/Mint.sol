@@ -54,7 +54,7 @@ contract Mint is IMint, ERC1155{
     uint dutchEndPrice;// = 0.1 ether;
     uint dutchStartPrice;//= 5 ether;
     uint dutchDiscountRate;// = 10000000000000000;
-    uint auctionEndTime;
+    uint  auctionEndTime;
 
 
     NFTInfo[] internal nftInfo;
@@ -400,14 +400,14 @@ function getAddresses() public view onlyBy(owner) returns (address,address){
     }
 
 
-    function getDutchPrice() 
-        public 
-        onlyBy(owner)
-        view 
-        returns(uint) {
+    // function getDutchPrice() 
+    //     public 
+    //     onlyBy(owner)
+    //     view 
+    //     returns(uint) {
 
-        return dutchStartPrice - (dutchDiscountRate*getElapsedTime());
-    }
+    //     return dutchStartPrice - (dutchDiscountRate*getElapsedTime());
+    // }
 
 
 function getAuctionEndTime()

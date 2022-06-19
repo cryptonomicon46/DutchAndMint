@@ -8,11 +8,43 @@ npm install
 
 ==========DEPLOY ON POLYGON MAIN NET =========
 truffle compile -all --config truffle-config.polygon.js --network polygon_infura_mainnet
-truffle run verify Mint --network polygon_infura_mainnet --config truffle-config.polygon.js
 truffle migrate --config truffle-config.polygon.js --network polygon_infura_mainnet
+truffle run verify Mint --network polygon_infura_mainnet --config truffle-config.polygon.js
+
+
+2_deployMint.js
+===============
+
+   Deploying 'Mint'
+   ----------------
+   > transaction hash:    0x5115f4d5909af73d9293b5c244bc08a37098ed14f2e574a37981a7a8cbb79d15
+   > Blocks: 3            Seconds: 4
+   > contract address:    0xcc8940F4594d1D9F98D6E4A256126fE3F213DC56
+   > block number:        29734710
+   > block timestamp:     1655600849
+   > account:             0xC5AE1dd3c4bBC7bD1f7260A4AC1758eb7c38C021
+   > balance:             817.396181608623212325
+   > gas used:            4660552 (0x471d48)
+   > gas price:           11000 gwei
+   > value sent:          0 ETH
+   > total cost:          51.266072 ETH
+
+   Pausing for 2 confirmations...
+
+   -------------------------------
+   > confirmation number: 2 (block: 29734713)
+   > Saving migration to chain.
+   > Saving artifacts
+   -------------------------------------
+   > Total cost:           51.266072 ETH
+
+
+Contract Address: 0xcc8940F4594d1D9F98D6E4A256126fE3F213DC56
+https://polygonscan.com/address/0xcc8940F4594d1D9F98D6E4A256126fE3F213DC56#code=
 
 Verified Contract Address:
-OpenSea link:
+Pass - Verified: https://polygonscan.com/address/0xcc8940F4594d1D9F98D6E4A256126fE3F213DC56#code
+
 
 
 
@@ -55,6 +87,8 @@ Verified Contract Address:
 https://mumbai.polygonscan.com/address/0x58Aa8aB78a8d527F70b58AeC3b65173b6901636a#code
 
 
+PolygonBrige and Swap link:
+https://wallet.polygon.technology/
 
 
 

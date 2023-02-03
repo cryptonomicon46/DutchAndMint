@@ -83,7 +83,7 @@ contract Mint is IMint, ERC1155{
         _;
 
     }
-
+    /// @notice: This needs to check if stage < number of stages available
     function nextDutchStage() internal {
         dutchStage = DutchStage(uint(dutchStage)+1);
     }
